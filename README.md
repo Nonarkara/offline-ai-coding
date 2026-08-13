@@ -51,15 +51,18 @@ This project solves all five. One command, and you have a complete, production-r
 
 ## What You Get
 
-### Three AI Models Running Locally
+### AI Models Running Locally
 
 | Model | Size | What It Does |
 |-------|------|-------------|
-| **Qwen 2.5 Coder 32B** | 19GB | Your main coding brain. Benchmarks near GPT-4o. 200+ languages. |
+| **Qwen 2.5 Coder 32B** | 19GB | Your main coding brain on 32GB+ machines. Benchmarks near GPT-4o. 200+ languages. |
+| **Gemma 4 E4B** | ~9.6GB | Main coding brain on **8GB** machines. MatFormer-nested — only ~4.5B params active per token despite the larger download, so it fits a tight RAM budget. Multimodal, up to 256K context. |
 | **Qwen 2.5 Coder 7B** | 4.7GB | Real-time autocomplete as you type. |
 | **DeepSeek R1 14B** | 9GB | Complex reasoning and debugging. |
 
 The installer auto-detects your RAM and chooses model sizes that fit. You don't have to decide anything.
+
+**Why Gemma 4 E4B on the 8GB tier instead of another Qwen model:** the "E4B" name is Google's MatFormer nesting — the ~8B-parameter download only activates ~4.5B params per token, so quality-per-GB beats a same-footprint dense model. It also needs **Ollama 0.22+**; the installer checks and upgrades automatically if you're behind.
 
 ### VS Code + AI Chat (Like Cursor / Copilot)
 
@@ -101,13 +104,32 @@ webui-start
 # Then open http://localhost:8080
 ```
 
+### Voice — Kyutai Pocket TTS (Optional)
+
+Offline text-to-speech, for having your AI read code reviews, changelogs, or long
+responses out loud instead of scrolling:
+
+```bash
+speak --text "the build passed" --voice default
+```
+
+**Why Kyutai over VoiceBox:** VoiceBox was published as a Meta research paper and
+demo — never released as weights you can actually download and run. Kyutai's
+[Pocket TTS](https://github.com/kyutai-labs/pocket-tts) is a real open-weight
+model: 100M parameters, real-time on CPU, no GPU required, with voice cloning
+from a short wav sample. That's the bar for anything in this repo — if you
+can't `pip install` it and run it fully offline, it doesn't belong here.
+
+Skipped by default (prompted during install, default: no) since it's not core
+to coding. Install later anytime: `pip3 install pocket-tts`.
+
 ---
 
 ## Hardware Requirements
 
 | RAM | Experience | Models You Get |
 |-----|-----------|---------------|
-| **8GB** | Works (slower) | Qwen 7B + DeepSeek 1.5B |
+| **8GB** | Works (slower) | Gemma 4 E4B + DeepSeek 1.5B |
 | **16GB** | Good | Qwen 14B + DeepSeek 7B |
 | **32GB** | Excellent | Qwen 32B + DeepSeek 14B |
 | **64GB+** | Best possible | Everything, full speed |

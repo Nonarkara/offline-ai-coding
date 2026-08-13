@@ -20,10 +20,10 @@
 
 | Chip | RAM | Models | Speed | Quality |
 |------|-----|--------|-------|---------|
-| M1 | 8GB | Qwen 7B | ~25 tok/s | Good |
+| M1 | 8GB | Gemma 4 E4B | ~25 tok/s | Good — better than Qwen 7B at the same footprint (~4.5B active params) |
 | M1 | 16GB | Qwen 14B | ~15 tok/s | Very good |
 | M1 Pro/Max | 32GB | Qwen 32B | ~8 tok/s | Excellent |
-| M2 | 8GB | Qwen 7B | ~30 tok/s | Good |
+| M2 | 8GB | Gemma 4 E4B | ~30 tok/s | Good |
 | M2 | 16GB | Qwen 14B | ~18 tok/s | Very good |
 | M2 Pro/Max | 32GB | Qwen 32B | ~10 tok/s | Excellent |
 | M3 | 16GB | Qwen 14B | ~20 tok/s | Very good |
@@ -36,7 +36,7 @@ Works via Rosetta 2 translation. Slightly slower than Apple Silicon.
 
 | RAM | Models | Speed | Quality |
 |-----|--------|-------|---------|
-| 8GB | Qwen 7B | ~15 tok/s | Good |
+| 8GB | Gemma 4 E4B | ~15 tok/s | Good |
 | 16GB | Qwen 14B | ~10 tok/s | Very good |
 | 32GB+ | Qwen 32B | ~6 tok/s | Excellent |
 
@@ -44,7 +44,7 @@ Works via Rosetta 2 translation. Slightly slower than Apple Silicon.
 
 | RAM | Models | Speed | Notes |
 |-----|--------|-------|-------|
-| 8GB | Qwen 7B | ~15 tok/s | Functional |
+| 8GB | Gemma 4 E4B | ~15 tok/s | Functional |
 | 16GB | Qwen 14B | ~12 tok/s | Good |
 | 32GB+ | Qwen 32B | ~8 tok/s | Great |
 
@@ -79,6 +79,12 @@ Requires Windows Subsystem for Linux 2. Performance similar to Linux.
 Plus ~5GB for Ollama, VS Code, and tools.
 
 **Recommendation:** Have at least 50GB free before installing.
+
+### Voice (optional, any tier)
+
+Kyutai Pocket TTS is 100M parameters — under 1GB on disk, real-time on CPU alone.
+It doesn't need its own RAM tier; if you can run the 8GB chat model, you can run
+this alongside it. No GPU, no extra download budget to plan for.
 
 ---
 

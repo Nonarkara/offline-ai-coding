@@ -149,10 +149,14 @@ elif [ "$RAM_GB" -ge 16 ]; then
     print_warn "16GB RAM → Installing: 14B chat + 7B completion (may be tight)"
 elif [ "$RAM_GB" -ge 8 ]; then
     TIER="8gb"
-    CHAT_MODEL="qwen2.5-coder:7b"
+    # Gemma 4 E4B over Qwen 7B on this tier: MatFormer nesting means only ~4.5B
+    # params are active per token despite an ~8B/9.6GB download, so it fits the
+    # 8GB budget with room to spare, is multimodal, and supports up to 256K
+    # context vs Qwen 7B's much smaller window. Needs Ollama 0.22+ (checked below).
+    CHAT_MODEL="gemma4:e4b"
     COMPLETION_MODEL="qwen2.5-coder:3b"
     REASONING_MODEL="deepseek-r1:1.5b"
-    print_warn "8GB RAM → Installing: 7B chat + 3B completion (slow but works)"
+    print_warn "8GB RAM → Installing: Gemma 4 E4B chat + Qwen 3B completion (slow but works)"
 else
     print_error "Your system has ${RAM_GB}GB RAM. Minimum is 8GB."
     exit 1
@@ -250,6 +254,18 @@ else
     print_warn "Ollama didn't auto-start. Will try again after a moment."
 fi
 
+# Gemma 4 needs Ollama 0.22+. Below that, gemma4:e4b pulls will 404 or fail
+# to load — upgrade rather than let a confusing model error be the first thing
+# an 8GB-tier user sees.
+if [[ "$CHAT_MODEL" == gemma4* ]] && command -v ollama &> /dev/null; then
+    OLLAMA_VER=$(ollama --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+    OLLAMA_MINOR=$(echo "$OLLAMA_VER" | cut -d. -f2)
+    if [ -n "$OLLAMA_MINOR" ] && [ "$OLLAMA_MINOR" -lt 22 ]; then
+        print_warn "Ollama $OLLAMA_VER is too old for Gemma 4 (need 0.22+). Upgrading..."
+        brew upgrade ollama 2>/dev/null || print_warn "Could not auto-upgrade — run 'brew upgrade ollama' manually"
+    fi
+fi
+
 # ============================================================================
 # STEP 5: DOWNLOAD MODELS
 # ============================================================================
@@ -332,7 +348,7 @@ cat > ~/.continue/config.json << EOF
 {
   "models": [
     {
-      "title": "Qwen Coder (Offline)",
+      "title": "$CHAT_MODEL (Offline)",
       "provider": "ollama",
       "model": "$CHAT_MODEL",
       "apiBase": "http://localhost:11434",
@@ -416,6 +432,35 @@ else
 fi
 
 # ============================================================================
+# STEP 9B: KYUTAI POCKET TTS (OPTIONAL VOICE)
+# ============================================================================
+
+print_header "STEP 7B: VOICE (OPTIONAL)"
+
+read -p "Install offline voice (Kyutai Pocket TTS)? (y/n, default: n): " INSTALL_VOICE
+INSTALL_VOICE=${INSTALL_VOICE:-n}
+
+if [[ "$INSTALL_VOICE" == "y" || "$INSTALL_VOICE" == "Y" ]]; then
+    # Kyutai's Pocket TTS over Meta's VoiceBox: VoiceBox was published as a
+    # research paper and demo, never released as weights you can actually run.
+    # Pocket TTS is a real open-weight model — 100M params, real-time on CPU,
+    # no GPU required — which matches "runs offline on hardware you own".
+    print_info "Installing Kyutai Pocket TTS..."
+    python3 -m pip install pocket-tts --break-system-packages 2>/dev/null || \
+    python3 -m pip install pocket-tts --user 2>/dev/null || \
+    print_warn "Could not install Pocket TTS. You can install manually with: pip3 install pocket-tts"
+
+    if ! grep -q "alias speak=" "$SHELL_RC" 2>/dev/null; then
+        echo "alias speak='pocket-tts generate'" >> "$SHELL_RC"
+        print_step "Added 'speak' alias"
+    fi
+    print_step "Kyutai Pocket TTS installed"
+    print_info "Try it: speak --text \"hello from your own machine\" --voice default"
+else
+    print_info "Skipped voice. You can install later with: pip3 install pocket-tts"
+fi
+
+# ============================================================================
 # STEP 10: VERIFY INSTALLATION
 # ============================================================================
 
@@ -429,7 +474,7 @@ else
 fi
 
 print_info "Testing model availability..."
-MODELS=$(ollama list | grep -E "(qwen|deepseek)" | wc -l)
+MODELS=$(ollama list | grep -E "(qwen|deepseek|gemma)" | wc -l)
 if [ "$MODELS" -ge 1 ]; then
     print_step "Models are available"
 else
@@ -454,6 +499,9 @@ echo "  ${CYAN}✓ VS Code${RESET}       — Editor with AI chat (Cmd+L)"
 echo "  ${CYAN}✓ Aider${RESET}         — Terminal coding agent (aider-offline)"
 if [[ "$INSTALL_WEBUI" == "y" || "$INSTALL_WEBUI" == "Y" ]]; then
 echo "  ${CYAN}✓ Open WebUI${RESET}    — ChatGPT-like chat interface"
+fi
+if [[ "$INSTALL_VOICE" == "y" || "$INSTALL_VOICE" == "Y" ]]; then
+echo "  ${CYAN}✓ Pocket TTS${RESET}    — Offline voice (Kyutai), 'speak' alias"
 fi
 echo ""
 echo "Next steps:"
