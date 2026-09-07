@@ -1,0 +1,62 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  // Global copy: ~/.config/opencode/opencode.jsonc
+  // Project copy: opencode.jsonc at the git root (overrides global).
+  // Docs: https://opencode.ai/docs/config
+  //       https://opencode.ai/docs/providers
+  //       https://openrouter.ai/docs/cookbook/coding-agents/opencode-integration
+  //
+  // Keys: run `opencode` then `/connect` → OpenRouter. Credentials land in
+  // ~/.local/share/opencode/auth.json — never in this file, never in git.
+  // Local Ollama does not need a real key; `/connect` → Other → id `ollama`
+  // and any non-empty placeholder is enough if OpenCode asks.
+  //
+  // Default model: local chat. Change to an OpenRouter slug when online.
+  "model": "ollama/qwen2.5-coder:14b",
+  "autoupdate": true,
+  "share": "disabled",
+  "permission": {
+    "*": "ask",
+    "read": "allow",
+    "edit": "ask",
+    "bash": {
+      "*": "ask",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "ls*": "allow",
+      "pwd": "allow",
+      "rm -rf *": "deny",
+      "sudo *": "deny"
+    },
+    "webfetch": "ask",
+    "external_directory": "ask"
+  },
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local)",
+      "options": {
+        "baseURL": "http://localhost:11434/v1"
+      },
+      "models": {
+        "gemma4:e4b": { "name": "Gemma 4 E4B (8GB tier)" },
+        "qwen2.5-coder:3b": { "name": "Qwen Coder 3B complete" },
+        "qwen2.5-coder:7b": { "name": "Qwen Coder 7B complete" },
+        "qwen2.5-coder:14b": { "name": "Qwen Coder 14B chat" },
+        "qwen2.5-coder:32b": { "name": "Qwen Coder 32B chat" },
+        "deepseek-r1:1.5b": { "name": "DeepSeek R1 1.5B" },
+        "deepseek-r1:7b": { "name": "DeepSeek R1 7B" },
+        "deepseek-r1:14b": { "name": "DeepSeek R1 14B" }
+      }
+    },
+    "openrouter": {
+      "models": {
+        "openrouter/free": { "name": "OpenRouter free router" },
+        "google/gemma-4-31b-it:free": { "name": "Gemma 4 31B free" },
+        "cohere/north-mini-code:free": { "name": "North Mini Code free" },
+        "nvidia/nemotron-3.5-lightning:free": { "name": "Nemotron 3.5 Lightning free" }
+      }
+    }
+  }
+}

@@ -6,7 +6,7 @@ We want this to work on every platform, for every developer, regardless of techn
 
 ### Report Bugs
 1. Check [TROUBLESHOOTING.md](TROUBLESHOOTING.md) first
-2. Search existing [Issues](https://github.com/nonarkara/offline-ai-coding/issues)
+2. Search existing [Issues](https://github.com/Nonarkara/offline-ai-coding/issues)
 3. Open a new issue with:
    - What you were doing
    - Exact error message (copy-paste, not screenshot)
@@ -30,8 +30,11 @@ Open a [Discussion](https://github.com/nonarkara/offline-ai-coding/discussions).
 | **Windows WSL2** | High | Getting seamless Windows support |
 | **GPU acceleration** | Medium | NVIDIA CUDA, AMD ROCm integration |
 | **Documentation** | Medium | Video walkthroughs, translations, guides |
+| **OpenCode / OpenRouter** | Medium | New `:free` slugs, VS Code YAML drift, Linux OpenCode paths |
 | **Model benchmarks** | Medium | Testing new models as they're released |
 | **CI/CD** | Low | Automated installer testing |
+
+Do not commit API keys, `auth.json`, or filled `.env` files. See [docs/GUARDRAILS.md](docs/GUARDRAILS.md).
 
 ## Code Guidelines
 

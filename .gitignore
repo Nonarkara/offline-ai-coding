@@ -27,3 +27,17 @@ node_modules/
 
 # Logs
 *.log
+
+# Secrets and local agent state if copied into a clone
+.env
+.env.*
+!.env.example
+!examples/.env.example
+!examples/continue.env.example
+auth.json
+/.aider.conf.yml
+/opencode.json
+/opencode.jsonc
+/.continue/
+
+

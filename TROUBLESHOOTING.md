@@ -150,7 +150,7 @@ qwen2.5-coder:7b      dae161e27b0e    4.7 GB  1 hour ago
 
 If the list is empty, the download didn't complete. Re-run the installer:
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/yourusername/offline-ai-coding/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Nonarkara/offline-ai-coding/main/install.sh)
 ```
 
 It will resume downloading models.
@@ -184,7 +184,7 @@ Instead of normal English text.
 2. **Open a new Terminal**
 3. **Run the installer again:**
    ```bash
-   bash <(curl -s https://raw.githubusercontent.com/yourusername/offline-ai-coding/main/install.sh)
+   bash <(curl -fsSL https://raw.githubusercontent.com/Nonarkara/offline-ai-coding/main/install.sh)
    ```
 
 The script is idempotent — it checks what's already installed and skips it. It's safe to re-run.
@@ -214,7 +214,7 @@ The script will resume from where it left off. Model downloads are resumable. Ju
    Partially downloaded models show up here.
 3. **Re-run the installer:**
    ```bash
-   bash <(curl -s https://raw.githubusercontent.com/yourusername/offline-ai-coding/main/install.sh)
+   bash <(curl -fsSL https://raw.githubusercontent.com/Nonarkara/offline-ai-coding/main/install.sh)
    ```
    It will resume the download.
 
@@ -407,10 +407,55 @@ sysctl -n hw.ncpu
 
 ---
 
+## OpenCode: no Ollama models in `/models`
+
+**Cause:** OpenCode does not auto-list Ollama tags. They must be in `~/.config/opencode/opencode.jsonc` under `provider.ollama.models` with the **exact** name from `ollama list`.
+
+**Fix:** `bash scripts/apply-studio-configs.sh` from a clone, then edit `"model": "ollama/<your-tag>"`. Base URL must end in `/v1`. See [docs/OPENCODE.md](docs/OPENCODE.md).
+
+---
+
+## OpenCode / Continue: replies truncate or the agent “forgets” the repo
+
+**Cause:** Ollama’s daemon default context is 4096. Client `contextLength` does not override it.
+
+**Fix:**
+
+```bash
+launchctl getenv OLLAMA_CONTEXT_LENGTH
+launchctl setenv OLLAMA_CONTEXT_LENGTH 16384
+```
+
+Fully quit Ollama.app and reopen. If you then see “model requires more system memory”, lower the number (8GB machines: 8192 or 2048).
+
+---
+
+## Continue: OpenRouter models missing or “no API key”
+
+**Cause:** VS Code does not read `export OPENROUTER_API_KEY` from Terminal. YAML also **replaces** JSON if `~/.continue/config.yaml` exists.
+
+**Fix:** Put `OPENROUTER_API_KEY=` in `~/.continue/.env` (no quotes needed). Restart VS Code. Template: `examples/continue.config.yaml`.
+
+---
+
+## OpenRouter: 429 Too Many Requests
+
+**Cause:** Free-tier cap (published as 50/day until credits, 20/min). Failed calls still count. Popular `:free` slugs are globally busy.
+
+**Fix:** Switch the Continue/OpenCode/Aider model back to **local Ollama**. Wait. Do not put the key in git or rotate keys to dodge the cap. Confirm current slugs at https://openrouter.ai/models?q=free
+
+---
+
+## `aider-openrouter`: command not found / 401
+
+New terminal after install. `echo $OPENROUTER_API_KEY` must be non-empty for CLI (unlike Continue). Alias is `aider --model openrouter/cohere/north-mini-code:free`. List: `aider --list-models openrouter/`.
+
+---
+
 ## Something Else Broke
 
 **Not listed here?** Open an issue on GitHub:
-https://github.com/yourusername/offline-ai-coding/issues
+https://github.com/Nonarkara/offline-ai-coding/issues
 
 Include:
 1. What you were trying to do
