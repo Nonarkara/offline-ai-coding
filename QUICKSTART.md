@@ -1,237 +1,123 @@
-# Quick Start — 5 Minutes to Offline AI Coding
+# Quick start — stranger to local chat
 
-**TL;DR:** Run one command, answer a few questions, wait for models to download, start coding with AI.
+**ไทย:** คำสั่งเดียว รอโมเดลโหลด เปิดเทอร์มินัลใหม่ ตรวจด้วยตารางด้านล่าง แล้วแชทใน VS Code  
+**EN:** One command, wait for models, new terminal, verify, then chat.
+
+Canonical landing page: [README.md](README.md). Privacy rules: [SECURITY.md](SECURITY.md). If something fails: [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 
 ---
 
-## Installation (One Command)
+## 1. Install (network this once)
 
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/yourusername/offline-ai-coding/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Nonarkara/offline-ai-coding/main/install.sh)
 ```
 
-That's it. The script:
-1. Detects your hardware
-2. Installs Ollama
-3. Downloads AI models (takes 20-40 minutes depending on your connection)
-4. Configures VS Code + Continue.dev
-5. Installs Aider
-6. Tests everything
+Or:
 
-**Total:** 30-45 minutes, then zero setup forever.
+```bash
+git clone https://github.com/Nonarkara/offline-ai-coding.git
+cd offline-ai-coding
+chmod +x install.sh
+./install.sh
+```
+
+The script **detects** OS / RAM / disk, **installs** Ollama and RAM-sized models, **wires** Continue + Aider, then runs a short **verify**. Answer the optional WebUI / voice prompts. Downloads dominate the wait (often 20–40 minutes). Safe to re-run; present models are skipped.
+
+Use **`install.sh`**, not the older helper scripts in the tree.
+
+Close Terminal completely and open a **new** one so `PATH` and `aider-offline` load.
 
 ---
 
-## Your First 5 Minutes of Coding
+## 2. What success looks like
 
-### Using VS Code (Recommended)
+Run these on the machine you just installed. You do not need the internet for this table.
 
-1. **Open VS Code** (Cmd+Space → "Visual Studio Code" → Enter)
-2. **Open a folder** (File → Open Folder → any folder you want to code in)
-3. **Press Cmd+L** (Mac) or **Ctrl+L** (Windows/Linux)
-4. **Chat with the AI:**
-   ```
-   Create a React component for a dashboard with 3 metric cards
-   ```
-5. Watch it write code. See the diff. Accept it. Done.
+| # | Check | Command / action | Pass |
+|---|--------|------------------|------|
+| 1 | Models on disk | `ollama list` | Chat + complete + reason IDs for [your RAM tier](README.md#hardware-tiers) (8 GB includes `gemma4:e4b`) |
+| 2 | Loopback API | `curl -sf http://localhost:11434/api/tags` | JSON, not a connection error |
+| 3 | Continue is local | `grep -E 'apiBase|allowAnonymousTelemetry' ~/.continue/config.json` | `http://localhost:11434` and `false` |
+| 4 | Scripted verify | From this repo: `bash scripts/verify.sh` | Core tools + models + config pass |
+| 5 | Editor chat | VS Code → **Cmd+L** / **Ctrl+L** → `Reply with: I am working locally.` | A short reply, no vendor login |
+| 6 | Tab complete | Type a function, press Tab | A local suggestion |
+| 7 | Terminal agent (optional) | `cd` into a **git** repo → `aider-offline` | Aider starts on the local chat model |
 
-**Repeat** for any coding task:
-- "Add TypeScript types to all functions"
-- "Create an API endpoint for user authentication"
-- "Fix the error on line 42"
-- "Refactor to use hooks instead of class components"
+Optional deeper ping (actually calls the models): `bash scripts/selftest.sh`.
 
-### Using Aider (Terminal Agent)
+If a row fails, do **not** paste an API key. Open [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — start with PATH and `ollama serve`.
 
-If you prefer a terminal experience (like Claude Code):
+---
+
+## 3. First five minutes
+
+### VS Code (usual path)
+
+1. Open Visual Studio Code.
+2. File → Open Folder → any project you own.
+3. Press **Cmd+L** (Mac) or **Ctrl+L** (Linux / Windows).
+4. Ask in plain language, then **read the diff** before you accept.
+
+Examples you can try on a scratch file:
+
+- “Add a function that returns the sum of a list.”
+- “Explain this file in three bullets.”
+- “Write a test for the function I just added.”
+
+Tab accepts autocomplete as you type.
+
+### Aider (terminal agent)
 
 ```bash
-cd ~/your-project
+cd ~/your-project   # must be a git repo
 aider-offline
 ```
 
-Then just chat:
-```
-Add dark mode support to the dashboard
-Fix the TypeScript errors
-Create a new component for displaying user profiles
-Refactor the state management to use Zustand
-```
+Aider can edit several files and commit. Review every commit. This is still a model.
 
-Aider reads your whole project, makes changes, commits to git. It's like a junior developer in your terminal.
-
----
-
-## Common Workflows
-
-### Build a New Project From Scratch
+### Optional browser chat
 
 ```bash
-# Create a new project
-mkdir ~/my-project && cd ~/my-project && git init
-
-# Start with Aider
-aider-offline
+webui-start
 ```
 
-Then tell it what you want:
-```
-Create a Next.js project with TypeScript and Tailwind CSS
-```
-
-It'll generate the whole project structure, install dependencies, create components — everything.
-
-### Work With an Existing GitHub Project
-
-```bash
-# Clone your repo
-git clone https://github.com/yourusername/my-repo.git
-cd my-repo
-
-# Open in VS Code
-code .
-
-# Or use Aider
-aider-offline
-```
-
-Chat with it about your codebase:
-```
-What does the authentication flow do?
-Add a new feature for user profiles
-Fix the bug in the payment processing
-Refactor this component to use TypeScript
-```
-
-### Iterative Development
-
-```
-> Create a dashboard with 4 cards
-> Add TypeScript types
-> Style with Tailwind CSS
-> Make the cards clickable
-> Add a modal that opens on click
-> Add form inputs to the modal
-> Connect to an API endpoint (placeholder)
-```
-
-Each step, the AI understands the previous context. It's truly conversational.
+Then open `http://localhost:8080` — not a public URL.
 
 ---
 
-## Your Tools
+## Hardware (short)
 
-| Tool | When to Use | How |
-|------|------------|-----|
-| **VS Code Chat (Cmd+L)** | Most of the time. Visual, familiar. | Open VS Code → Cmd+L → chat |
-| **Aider Terminal** | When you want the AI to manage your whole project. | `aider-offline` in your project folder |
-| **Open WebUI** | Brainstorming, planning, asking questions. | `webui-start` → open http://localhost:8080 |
+| Your RAM | Chat model the installer picks |
+|----------|--------------------------------|
+| 64 GB+ | `qwen2.5-coder:32b` |
+| 32 GB | `qwen2.5-coder:32b` |
+| 16 GB | `qwen2.5-coder:14b` |
+| 8 GB | `gemma4:e4b` (needs Ollama 0.22+) |
+| under 8 GB | installer exits |
 
----
-
-## Hardware Tiers
-
-The script auto-detects your RAM and installs the best models for your hardware:
-
-| Your RAM | What You Get | Speed | Quality |
-|----------|------------|-------|---------|
-| 64GB | Qwen 32B + reasoning models | ~10 tokens/sec | Best (near GPT-4o) |
-| 32GB | Qwen 32B + reasoning | ~10 tokens/sec | Best (near GPT-4o) |
-| 16GB | Qwen 14B + reasoning | ~15 tokens/sec | Very good |
-| 8GB | Qwen 7B + smaller models | ~30 tokens/sec | Good |
-
-Larger models = better code quality. But even 7B is genuinely impressive for coding.
+Full table and machine notes: [docs/HARDWARE.md](docs/HARDWARE.md).
 
 ---
 
-## After Installation
+## Safety in one screen
 
-### First Time You Open VS Code
-
-VS Code might ask about the Continue.dev extension. Click "Install" or just open VS Code normally. Continue is already configured to use your local models.
-
-### First Time You Use Aider
-
-Aider will ask if you want to create a git repo. Say yes (`y`). It tracks its changes automatically.
-
-### If Models Don't Appear in VS Code Chat
-
-1. Make sure Ollama is running (check for llama icon in menu bar, or run `ollama serve`)
-2. Restart VS Code
-3. See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) if it persists
+- After setup, traffic should be **localhost**. Pointing Continue at a cloud API is not this method.
+- Continue telemetry is **off** in the file the installer writes.
+- [LICENSE](LICENSE) is MIT for **scripts and docs**. Model weights have their own licences.
+- Never commit `~/.continue/`, `~/.ollama/`, `.env`, or keys. See [SECURITY.md](SECURITY.md).
+- Review generated code. Local does not mean correct.
 
 ---
 
-## Disconnecting From the Internet
+## If it breaks
 
-After setup, everything works offline. To confirm:
+| Symptom | Jump |
+|---------|------|
+| `command not found` | [TROUBLESHOOTING.md](TROUBLESHOOTING.md#command-not-found-for-basic-commands) |
+| `ollama` missing | [TROUBLESHOOTING.md](TROUBLESHOOTING.md#command-not-found-ollama) |
+| Continue empty / no model | [TROUBLESHOOTING.md](TROUBLESHOOTING.md#vscode-no-model-configured-in-continuedev-chat) |
+| Install interrupted | Re-run `install.sh` |
+| Machine too small | [docs/HARDWARE.md](docs/HARDWARE.md) |
 
-1. **Disconnect WiFi or unplug ethernet**
-2. **Open VS Code**
-3. **Press Cmd+L and chat**
-
-It works. Models run locally. No internet needed.
-
----
-
-## Costs
-
-- **Setup:** Zero (all free, open-source software)
-- **Monthly:** Zero (runs on your hardware)
-- **Total cost of ownership:** One-time hardware cost if you need to upgrade your computer
-
-Compare to: $20/month Claude, $20/month Copilot, $0.03/1k tokens Gemini. This saves money immediately if you code regularly.
-
----
-
-## Is It Really Offline?
-
-**Yes.** After the initial model download:
-- Ollama runs locally
-- Models are on your disk
-- VS Code talks to Ollama via localhost
-- Aider works entirely locally
-- No data leaves your computer
-
-You can:
-- Disconnect from the internet
-- Code for hours
-- Reconnect when done
-- Push to GitHub
-
-Your code stays on your machine until you explicitly push it.
-
----
-
-## What If Something Goes Wrong?
-
-Check [TROUBLESHOOTING.md](TROUBLESHOOTING.md). We've hit every problem and documented the solutions.
-
-Common issues:
-- **"Model not found"** → Ollama might not be running. Run `ollama serve`.
-- **"Continue.dev won't connect"** → Restart VS Code. Check Ollama is running.
-- **"Installation interrupted"** → Re-run the script. It resumes from where it left off.
-- **"My computer is too old/slow"** → See [HARDWARE.md](HARDWARE.md) for minimum specs.
-
----
-
-## Next Steps
-
-1. **Run the installer** (one command, above)
-2. **Wait for models to download** (30-45 minutes, then you're done)
-3. **Open VS Code and press Cmd+L**
-4. **Start coding**
-
-That's it. You've got your own Claude/Copilot equivalent, forever, on your machine.
-
----
-
-**Questions?** See [README.md](README.md) for the full story, [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for solutions, or open an issue on GitHub.
-
-**Ready?** Run the installer:
-
-```bash
-bash <(curl -s https://raw.githubusercontent.com/yourusername/offline-ai-coding/main/install.sh)
-```
-
-Welcome. You're about to save a lot of money and gain a lot of freedom.
+Diagrams of the flow, the stack, and localhost vs network: [README.md#diagrams](README.md#diagrams).

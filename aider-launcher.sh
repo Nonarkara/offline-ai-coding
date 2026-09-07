@@ -1,5 +1,6 @@
 #!/bin/bash
 # Simple Aider launcher
+# SPDX-License-Identifier: MIT
 # Use this to start your offline AI coding agent
 
 # Make sure we're in a project directory

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # ============================================================================
 # PATH REPAIR UTILITY
 # Fixes broken shell PATH on macOS and Linux

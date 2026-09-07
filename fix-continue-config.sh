@@ -1,5 +1,6 @@
 #!/bin/bash
 # Fix Continue.dev config to work properly with Ollama models
+# SPDX-License-Identifier: MIT
 
 # Detect RAM for model selection
 RAM_BYTES=$(sysctl -n hw.memsize)

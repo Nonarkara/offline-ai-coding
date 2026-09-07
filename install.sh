@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Non Arkaraprasertkul / Axiom X Co., Ltd.
 # ============================================================================
 # OFFLINE AI CODING — Complete Setup Script
 #
@@ -523,6 +525,11 @@ echo ""
 fi
 echo -e "${YELLOW}Pro tip:${RESET} Models auto-downloaded are in ~/.ollama"
 echo "You can delete models to free space, re-download when needed."
+echo ""
+echo "Verify (from a clone of this repo):"
+echo "  bash scripts/verify.sh"
+echo "Success table: QUICKSTART.md  ·  Privacy: SECURITY.md"
+echo "Continue must stay on http://localhost:11434 — do not add a cloud key and call it offline."
 echo ""
 echo "No internet needed from here on. You're truly ${BOLD}off the grid.${RESET}"
 echo ""

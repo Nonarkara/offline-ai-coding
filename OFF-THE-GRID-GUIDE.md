@@ -1,55 +1,55 @@
-# Off-the-Grid Coding: Your Offline AI Coding Environment
+# Off-the-grid coding
 
-## The Big Picture
+Mac-oriented narrative of the same method as [README.md](README.md). First session and verify table: [QUICKSTART.md](QUICKSTART.md). Privacy: [SECURITY.md](SECURITY.md). Pictures of the stack: [README.md#diagrams](README.md#diagrams).
 
-You're setting up a fully offline coding environment that gives you AI-powered coding assistance — autocomplete, chat, code generation, debugging — without any internet connection. Everything runs locally on your MacBook's Apple Silicon chip.
+## The big picture
+
+You are setting up coding assistance — autocomplete, chat, generation, debugging — that **does not need the internet after the first download**. Everything runs on a machine you own. Apple Silicon is where these notes are strongest (unified memory). The installer also tries Linux.
+
+This is **not** Claude, Copilot, or Cursor. It is Ollama + Continue + Aider on localhost.
 
 **What you'll have when done:**
 
-| Tool | What It Does | Equivalent To |
-|------|-------------|---------------|
-| **Ollama** | Runs AI models locally on your Mac | The "engine" behind everything |
-| **VS Code + Continue.dev** | Code editor with AI chat + autocomplete | VS Code + Copilot / Cursor |
-| **Aider** | Terminal coding agent | Claude Code / Codex |
-| **Open WebUI** (optional) | Chat interface in browser | ChatGPT / Claude.ai |
+| Tool | What it does | Stays on |
+|------|-------------|----------|
+| **Ollama** | Local model runtime | `http://127.0.0.1:11434` |
+| **VS Code + Continue.dev** | Editor chat + tab complete | `~/.continue/config.json` → localhost, telemetry off |
+| **Aider** | Terminal agent (`aider-offline`) | Same local chat model |
+| **Open WebUI** (optional) | Browser chat | `http://localhost:8080` |
 
-**AI Models installed:**
+**Models the installer picks** (from `install.sh`, not a ranking):
 
-| Your RAM | Chat Model | Autocomplete Model | Quality Level |
-|----------|-----------|-------------------|--------------|
-| 64GB | Qwen 2.5 Coder 32B | Qwen 2.5 Coder 7B | Near GPT-4o |
-| 32GB | Qwen 2.5 Coder 32B | Qwen 2.5 Coder 7B | Near GPT-4o |
-| 16GB | Qwen 2.5 Coder 14B | Qwen 2.5 Coder 3B | Good |
-| 8GB | Qwen 2.5 Coder 7B | Qwen 2.5 Coder 1.5B | Decent |
+| Your RAM | Chat | Autocomplete | Reasoning |
+|----------|------|--------------|-----------|
+| 64 GB+ | `qwen2.5-coder:32b` | `qwen2.5-coder:7b` | `deepseek-r1:14b` |
+| 32 GB | `qwen2.5-coder:32b` | `qwen2.5-coder:7b` | `deepseek-r1:7b` |
+| 16 GB | `qwen2.5-coder:14b` | `qwen2.5-coder:7b` | `deepseek-r1:7b` |
+| 8 GB | `gemma4:e4b` | `qwen2.5-coder:3b` | `deepseek-r1:1.5b` |
 
 ---
 
-## How to Install (One Command)
+## How to install (one command)
 
-Open **Terminal** (press Cmd+Space, type "Terminal", hit Enter), then paste this:
-
-```bash
-bash ~/path/to/setup-offline-coding.sh
-```
-
-Replace `~/path/to/` with wherever you saved the script. If it's in your Downloads:
+Open **Terminal** (Cmd+Space → Terminal), then:
 
 ```bash
-bash ~/Downloads/setup-offline-coding.sh
+bash <(curl -fsSL https://raw.githubusercontent.com/Nonarkara/offline-ai-coding/main/install.sh)
 ```
+
+Or clone this repo and run `./install.sh`. Do **not** start from `setup-offline-coding.sh` — that helper is older. **`install.sh` is current.**
 
 The script will:
-1. Detect your Mac's RAM and choose the best models
-2. Install Homebrew (Mac package manager) if needed
-3. Install Ollama (local AI engine)
-4. Download the coding AI models (one-time, needs internet)
-5. Install/configure VS Code with Continue.dev extension
-6. Install Aider (terminal coding agent)
-7. Optionally install Open WebUI (chat interface)
-8. Test everything
+1. Detect RAM and choose models
+2. Install Homebrew if needed
+3. Install Ollama
+4. Download models (one-time, needs internet)
+5. Install/configure VS Code + Continue.dev
+6. Install Aider (`aider-offline`)
+7. Optionally install Open WebUI / Pocket TTS
+8. Print a short verify — then you run `bash scripts/verify.sh`
 
-**Total time:** ~20-40 minutes (mostly model downloads).
-**Internet needed:** Only for this initial setup. After that, never again.
+**Total time:** ~20-40 minutes (mostly downloads).
+**Internet needed:** Only for this initial setup. After that, localhost. See [SECURITY.md](SECURITY.md) for what “offline” does and does not mean.
 
 ---
 
@@ -147,32 +147,21 @@ ollama search coder    # See what's available
 
 ---
 
-## How It All Fits Together
+## How it all fits together
+
+Illustrated versions (install flow, stack, network-once vs localhost): [README.md#diagrams](README.md#diagrams).
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                  YOUR MACBOOK                        │
-│                                                     │
-│  ┌──────────────┐    ┌───────────────────────────┐  │
-│  │   Ollama      │◄───│  VS Code + Continue.dev   │  │
-│  │  (AI Engine)  │    │  (Editor + AI Chat +      │  │
-│  │               │    │   Autocomplete)           │  │
-│  │  Models:      │    └───────────────────────────┘  │
-│  │  • Qwen Coder │                                   │
-│  │  • DeepSeek   │    ┌───────────────────────────┐  │
-│  │               │◄───│  Aider                    │  │
-│  │               │    │  (Terminal Coding Agent)   │  │
-│  │               │    └───────────────────────────┘  │
-│  │               │                                   │
-│  │               │    ┌───────────────────────────┐  │
-│  │               │◄───│  Open WebUI (optional)    │  │
-│  │               │    │  (Chat Interface)         │  │
-│  └──────────────┘    └───────────────────────────┘  │
-│                                                     │
-│          ⚡ All local. No internet needed. ⚡        │
-└─────────────────────────────────────────────────────┘
+Your machine
+  Ollama  ←──  VS Code + Continue.dev
+     ↑    ←──  Aider (aider-offline)
+     ↑    ←──  Open WebUI (optional)
+     └──  Chat / complete / reason weights on disk
+          http://127.0.0.1:11434
 ```
+
+After the first download, those arrows do not leave the box. Pointing the same editor at a hosted API is not this method.
 
 ---
 
-*Setup created April 2026. Models and tools are actively maintained — update periodically when online.*
+*Installer and model IDs follow `install.sh`. Update tools when you are back online; do not treat a cloud wire-up as “offline.”*
