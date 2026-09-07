@@ -134,18 +134,21 @@ if [ "$RAM_GB" -ge 64 ]; then
     CHAT_MODEL="qwen2.5-coder:32b"
     COMPLETION_MODEL="qwen2.5-coder:7b"
     REASONING_MODEL="deepseek-r1:14b"
+    OLLAMA_CTX=65536
     print_info "64GB+ RAM → Installing: 32B chat + 7B completion + 14B reasoning"
 elif [ "$RAM_GB" -ge 32 ]; then
     TIER="32gb"
     CHAT_MODEL="qwen2.5-coder:32b"
     COMPLETION_MODEL="qwen2.5-coder:7b"
     REASONING_MODEL="deepseek-r1:7b"
+    OLLAMA_CTX=32768
     print_info "32GB RAM → Installing: 32B chat + 7B completion + 7B reasoning"
 elif [ "$RAM_GB" -ge 16 ]; then
     TIER="16gb"
     CHAT_MODEL="qwen2.5-coder:14b"
     COMPLETION_MODEL="qwen2.5-coder:7b"
     REASONING_MODEL="deepseek-r1:7b"
+    OLLAMA_CTX=16384
     print_warn "16GB RAM → Installing: 14B chat + 7B completion (may be tight)"
 elif [ "$RAM_GB" -ge 8 ]; then
     TIER="8gb"
@@ -156,6 +159,7 @@ elif [ "$RAM_GB" -ge 8 ]; then
     CHAT_MODEL="gemma4:e4b"
     COMPLETION_MODEL="qwen2.5-coder:3b"
     REASONING_MODEL="deepseek-r1:1.5b"
+    OLLAMA_CTX=8192
     print_warn "8GB RAM → Installing: Gemma 4 E4B chat + Qwen 3B completion (slow but works)"
 else
     print_error "Your system has ${RAM_GB}GB RAM. Minimum is 8GB."
@@ -163,6 +167,7 @@ else
 fi
 
 print_step "Model tier: $TIER"
+print_info "Ollama daemon context (OLLAMA_CONTEXT_LENGTH): $OLLAMA_CTX"
 
 # ============================================================================
 # STEP 2: FIX PATH (CRITICAL — this is what was breaking everything)
@@ -201,6 +206,22 @@ fi
 # Export for this session
 export PATH="${FULL_PATH}:${PATH}"
 print_step "PATH updated for this session"
+
+# Ollama serves 4096 context unless the *daemon* env is set. Client-side
+# contextLength in OpenCode/Continue does not override this.
+if ! grep -q "OLLAMA_CONTEXT_LENGTH" "$SHELL_RC" 2>/dev/null; then
+    {
+        echo ""
+        echo "# Offline AI Coding — Ollama daemon context (quit Ollama.app after changing)"
+        echo "export OLLAMA_CONTEXT_LENGTH=${OLLAMA_CTX}"
+    } >> "$SHELL_RC"
+    print_step "Set OLLAMA_CONTEXT_LENGTH=$OLLAMA_CTX in $SHELL_RC"
+fi
+export OLLAMA_CONTEXT_LENGTH="${OLLAMA_CTX}"
+if [[ "$OS" == "macos" ]]; then
+    launchctl setenv OLLAMA_CONTEXT_LENGTH "${OLLAMA_CTX}" 2>/dev/null || true
+    print_info "macOS: quit and reopen Ollama.app so the daemon picks up context length"
+fi
 
 # ============================================================================
 # STEP 3: INSTALL HOMEBREW (if needed)
@@ -341,7 +362,7 @@ print_header "STEP 5: CONTINUE.DEV (AI INTEGRATION)"
 print_info "Installing Continue.dev extension..."
 code --install-extension Continue.continue 2>/dev/null || true
 
-# Create Continue config
+# Create Continue config (legacy JSON — still useful if YAML is absent)
 mkdir -p ~/.continue
 
 cat > ~/.continue/config.json << EOF
@@ -352,7 +373,7 @@ cat > ~/.continue/config.json << EOF
       "provider": "ollama",
       "model": "$CHAT_MODEL",
       "apiBase": "http://localhost:11434",
-      "contextLength": 32768,
+      "contextLength": $OLLAMA_CTX,
       "completionOptions": {"temperature": 0.1, "maxTokens": 4096},
       "capabilities": {"tools": false}
     },
@@ -361,7 +382,7 @@ cat > ~/.continue/config.json << EOF
       "provider": "ollama",
       "model": "$REASONING_MODEL",
       "apiBase": "http://localhost:11434",
-      "contextLength": 32768,
+      "contextLength": $OLLAMA_CTX,
       "completionOptions": {"temperature": 0.1, "maxTokens": 4096},
       "capabilities": {"tools": false}
     }
@@ -375,6 +396,70 @@ cat > ~/.continue/config.json << EOF
   "allowAnonymousTelemetry": false
 }
 EOF
+
+# YAML wins over JSON in current Continue. Write only if missing so we do not
+# clobber a user's OpenRouter setup. Includes local models + OpenRouter stubs
+# that stay inert until ~/.continue/.env has OPENROUTER_API_KEY.
+if [[ ! -f "$HOME/.continue/config.yaml" ]]; then
+    cat > "$HOME/.continue/config.yaml" << EOF
+name: Offline AI Coding
+version: 0.1.0
+schema: v1
+models:
+  - name: Local chat (Ollama)
+    provider: ollama
+    model: $CHAT_MODEL
+    apiBase: http://localhost:11434
+    roles: [chat, edit, apply]
+    defaultCompletionOptions:
+      temperature: 0.1
+      contextLength: $OLLAMA_CTX
+  - name: Local reasoning (Ollama)
+    provider: ollama
+    model: $REASONING_MODEL
+    apiBase: http://localhost:11434
+    roles: [chat]
+    defaultCompletionOptions:
+      temperature: 0.1
+      contextLength: $OLLAMA_CTX
+  - name: Local autocomplete (Ollama)
+    provider: ollama
+    model: $COMPLETION_MODEL
+    apiBase: http://localhost:11434
+    roles: [autocomplete]
+  - name: OpenRouter free router
+    provider: openrouter
+    model: openrouter/free
+    apiBase: https://openrouter.ai/api/v1
+    apiKey: \${{ secrets.OPENROUTER_API_KEY }}
+    roles: [chat, edit]
+    requestOptions:
+      extraBodyProperties:
+        provider:
+          data_collection: deny
+  - name: OpenRouter Gemma 4 31B free
+    provider: openrouter
+    model: google/gemma-4-31b-it:free
+    apiBase: https://openrouter.ai/api/v1
+    apiKey: \${{ secrets.OPENROUTER_API_KEY }}
+    roles: [chat, edit]
+  - name: OpenRouter North Mini Code free
+    provider: openrouter
+    model: cohere/north-mini-code:free
+    apiBase: https://openrouter.ai/api/v1
+    apiKey: \${{ secrets.OPENROUTER_API_KEY }}
+    roles: [chat, edit]
+    capabilities:
+      - tool_use
+EOF
+    print_step "Wrote ~/.continue/config.yaml (YAML overrides JSON when present)"
+    if [[ ! -f "$HOME/.continue/.env" ]]; then
+        echo "OPENROUTER_API_KEY=" > "$HOME/.continue/.env"
+        print_info "Created empty ~/.continue/.env — add a key only if you use OpenRouter"
+    fi
+else
+    print_info "Kept existing ~/.continue/config.yaml"
+fi
 
 print_step "Continue.dev configured"
 
@@ -406,6 +491,93 @@ fi
 if ! grep -q "aider-offline" "$SHELL_RC" 2>/dev/null; then
     echo "alias aider-offline='aider --model ollama_chat/$CHAT_MODEL'" >> "$SHELL_RC"
     print_step "Added 'aider-offline' alias"
+fi
+if ! grep -q "aider-openrouter" "$SHELL_RC" 2>/dev/null; then
+    echo "alias aider-openrouter='aider --model openrouter/cohere/north-mini-code:free'" >> "$SHELL_RC"
+    print_step "Added 'aider-openrouter' alias (needs OPENROUTER_API_KEY; not offline)"
+fi
+
+if [[ ! -f "$HOME/.aider.conf.yml" ]]; then
+    cat > "$HOME/.aider.conf.yml" << EOF
+model: ollama_chat/$CHAT_MODEL
+auto-commits: false
+dirty-commits: false
+attribute-author: false
+attribute-committer: false
+git: true
+check-update: false
+EOF
+    print_step "Wrote ~/.aider.conf.yml (no API keys)"
+fi
+
+# ============================================================================
+# STEP 8B: OPENCODE (OPTIONAL TUI / DESKTOP / IDE AGENT)
+# ============================================================================
+
+print_header "STEP 6B: OPENCODE (OPTIONAL)"
+
+read -p "Install OpenCode (TUI agent for Ollama + OpenRouter)? (y/n, default: y): " INSTALL_OPENCODE
+INSTALL_OPENCODE=${INSTALL_OPENCODE:-y}
+
+if [[ "$INSTALL_OPENCODE" == "y" || "$INSTALL_OPENCODE" == "Y" ]]; then
+    if command -v opencode &> /dev/null; then
+        print_step "OpenCode already installed"
+    else
+        print_info "Installing OpenCode via Homebrew tap…"
+        brew tap anomalyco/tap 2>/dev/null || true
+        if brew install anomalyco/tap/opencode 2>/dev/null || brew install opencode 2>/dev/null; then
+            print_step "OpenCode installed"
+        else
+            print_warn "Homebrew OpenCode failed. Later: curl -fsSL https://opencode.ai/install | bash"
+        fi
+    fi
+    mkdir -p "$HOME/.config/opencode"
+    if [[ ! -f "$HOME/.config/opencode/opencode.jsonc" && ! -f "$HOME/.config/opencode/opencode.json" ]]; then
+        SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+        if [[ -f "$SCRIPT_DIR/examples/opencode.jsonc" ]]; then
+            sed "s|\"model\": \"ollama/qwen2.5-coder:14b\"|\"model\": \"ollama/${CHAT_MODEL}\"|" \
+                "$SCRIPT_DIR/examples/opencode.jsonc" \
+                > "$HOME/.config/opencode/opencode.jsonc"
+        else
+            cat > "$HOME/.config/opencode/opencode.jsonc" << EOF
+{
+  "\$schema": "https://opencode.ai/config.json",
+  "model": "ollama/${CHAT_MODEL}",
+  "share": "disabled",
+  "permission": {
+    "edit": "ask",
+    "bash": "ask"
+  },
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local)",
+      "options": { "baseURL": "http://localhost:11434/v1" },
+      "models": {
+        "${CHAT_MODEL}": { "name": "Local chat" },
+        "${COMPLETION_MODEL}": { "name": "Local complete" },
+        "${REASONING_MODEL}": { "name": "Local reason" }
+      }
+    },
+    "openrouter": {
+      "models": {
+        "openrouter/free": {},
+        "google/gemma-4-31b-it:free": {},
+        "cohere/north-mini-code:free": {}
+      }
+    }
+  }
+}
+EOF
+        fi
+        print_step "Wrote ~/.config/opencode/opencode.jsonc (Ollama default: $CHAT_MODEL)"
+    else
+        print_info "Kept existing OpenCode config"
+    fi
+    print_info "OpenRouter: run opencode then /connect — do not paste keys into JSON"
+else
+    print_info "Skipped OpenCode. Install later: brew install anomalyco/tap/opencode"
+    print_info "Then: bash scripts/apply-studio-configs.sh"
 fi
 
 # ============================================================================
@@ -497,6 +669,34 @@ echo "  ${CYAN}✓ Models${RESET}        — $COMPLETION_MODEL (autocomplete)"
 echo "  ${CYAN}✓ Models${RESET}        — $REASONING_MODEL (reasoning)"
 echo "  ${CYAN}✓ VS Code${RESET}       — Editor with AI chat (Cmd+L)"
 echo "  ${CYAN}✓ Aider${RESET}         — Terminal coding agent (aider-offline)"
+if [[ "${INSTALL_OPENCODE:-n}" == "y" || "${INSTALL_OPENCODE:-n}" == "Y" ]]; then
+echo "  ${CYAN}✓ OpenCode${RESET}      — TUI agent (local Ollama; /connect for OpenRouter)"
+fi
+if [[ "$INSTALL_WEBUI" == "y" || "$INSTALL_WEBUI" == "Y" ]]; then
+echo "  ${CYAN}✓ Open WebUI${RESET}    — ChatGPT-like chat interface"
+fi
+if [[ "$INSTALL_VOICE" == "y" || "$INSTALL_VOICE" == "Y" ]]; then
+echo "  ${CYAN}✓ Pocket TTS${RESET}    — Offline voice (Kyutai), 'speak' alias"
+fi
+echo ""
+echo "Next steps:"
+echo ""
+echo "  1. Close this terminal and ${BOLD}open a new one${RESET}"
+echo "     (This loads the updated PATH)"
+echo ""
+echo "  2. ${BOLD}Open VS Code${RESET}"
+echo "     Press Cmd+L (Mac) or Ctrl+L (Windows/Linux) to chat with AI"
+echo "     Local models are the default. OpenRouter: fill ~/.continue/.env"
+echo ""
+echo "  3. ${BOLD}To use Aider (terminal agent)${RESET}:"
+echo "     cd ~/my-project && aider-offline"
+echo "     Online free models: export OPENROUTER_API_KEY=… && aider-openrouter"
+echo ""
+if [[ "${INSTALL_OPENCODE:-n}" == "y" || "${INSTALL_OPENCODE:-n}" == "Y" ]]; then
+echo "  3b. ${BOLD}OpenCode${RESET}:  cd ~/my-project && opencode"
+echo "      /models for Ollama; /connect then OpenRouter for :free slugs"
+echo ""
+fi
 if [[ "$INSTALL_WEBUI" == "y" || "$INSTALL_WEBUI" == "Y" ]]; then
 echo "  ${CYAN}✓ Open WebUI${RESET}    — ChatGPT-like chat interface"
 fi
@@ -524,5 +724,9 @@ fi
 echo -e "${YELLOW}Pro tip:${RESET} Models auto-downloaded are in ~/.ollama"
 echo "You can delete models to free space, re-download when needed."
 echo ""
-echo "No internet needed from here on. You're truly ${BOLD}off the grid.${RESET}"
+echo "Quit and reopen Ollama.app if you use the menu-bar app, so"
+echo "OLLAMA_CONTEXT_LENGTH=$OLLAMA_CTX is picked up by the daemon."
+echo ""
+echo "Local path: no internet needed from here on."
+echo "OpenRouter path: optional, online, not offline — see docs/OPENROUTER.md"
 echo ""

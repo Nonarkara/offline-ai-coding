@@ -1,0 +1,77 @@
+# Continue.dev v1 YAML. Copy to ~/.continue/config.yaml
+# If this file exists, Continue loads it INSTEAD of config.json.
+# Docs: https://docs.continue.dev/customize/model-providers/top-level/ollama
+#       https://docs.continue.dev/customize/model-providers/top-level/openrouter
+#
+# Local models: replace the ollama `model:` lines with whatever `ollama list` shows
+# (the installer writes those IDs for you). OpenRouter entries stay inert until
+# ~/.continue/.env contains OPENROUTER_API_KEY=  (empty key = skip those models).
+
+name: Offline AI Coding
+version: 0.1.0
+schema: v1
+
+models:
+  - name: Local chat (Ollama)
+    provider: ollama
+    model: qwen2.5-coder:14b
+    apiBase: http://localhost:11434
+    roles:
+      - chat
+      - edit
+      - apply
+    defaultCompletionOptions:
+      temperature: 0.1
+      contextLength: 16384
+
+  - name: Local reasoning (Ollama)
+    provider: ollama
+    model: deepseek-r1:7b
+    apiBase: http://localhost:11434
+    roles:
+      - chat
+    defaultCompletionOptions:
+      temperature: 0.1
+      contextLength: 16384
+
+  - name: Local autocomplete (Ollama)
+    provider: ollama
+    model: qwen2.5-coder:7b
+    apiBase: http://localhost:11434
+    roles:
+      - autocomplete
+
+  # Online, free-tier. Not offline. Do not use for secrets or private client code
+  # unless you have read OpenRouter privacy settings and this model's card.
+  - name: OpenRouter free router
+    provider: openrouter
+    model: openrouter/free
+    apiBase: https://openrouter.ai/api/v1
+    apiKey: ${{ secrets.OPENROUTER_API_KEY }}
+    roles:
+      - chat
+      - edit
+    requestOptions:
+      extraBodyProperties:
+        provider:
+          data_collection: deny
+
+  - name: OpenRouter Gemma 4 31B free
+    provider: openrouter
+    model: google/gemma-4-31b-it:free
+    apiBase: https://openrouter.ai/api/v1
+    apiKey: ${{ secrets.OPENROUTER_API_KEY }}
+    roles:
+      - chat
+      - edit
+
+  - name: OpenRouter North Mini Code free
+    provider: openrouter
+    model: cohere/north-mini-code:free
+    apiBase: https://openrouter.ai/api/v1
+    apiKey: ${{ secrets.OPENROUTER_API_KEY }}
+    roles:
+      - chat
+      - edit
+    capabilities:
+      - tool_use

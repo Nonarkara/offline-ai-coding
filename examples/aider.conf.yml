@@ -1,0 +1,19 @@
+# Copy to ~/.aider.conf.yml (user-wide) or .aider.conf.yml in a git root.
+# Docs: https://aider.chat/docs/llms/openrouter.html
+# Default stays local. Switch with:  aider --model openrouter/cohere/north-mini-code:free
+
+model: ollama_chat/qwen2.5-coder:14b
+
+# Aider reads OPENROUTER_API_KEY from the environment or a gitignored .env
+# next to the project — not from this file. Do not paste keys here.
+
+# Uncomment when you want the CLI on OpenRouter free models (needs network):
+# model: openrouter/cohere/north-mini-code:free
+# dark-mode: true
+
+auto-commits: false
+dirty-commits: false
+attribute-author: false
+attribute-committer: false
+git: true
+check-update: false

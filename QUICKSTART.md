@@ -1,24 +1,28 @@
-# Quick Start — 5 Minutes to Offline AI Coding
+# Quick Start — Offline local, optional OpenRouter
 
-**TL;DR:** Run one command, answer a few questions, wait for models to download, start coding with AI.
+**TL;DR:** Run the installer once (needs network). After that, **Ollama is local**. OpenRouter free models are a **separate, online** option.
+
+Canonical clone: `https://github.com/Nonarkara/offline-ai-coding`
 
 ---
 
 ## Installation (One Command)
 
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/yourusername/offline-ai-coding/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Nonarkara/offline-ai-coding/main/install.sh)
 ```
 
 That's it. The script:
-1. Detects your hardware
-2. Installs Ollama
-3. Downloads AI models (takes 20-40 minutes depending on your connection)
-4. Configures VS Code + Continue.dev
-5. Installs Aider
-6. Tests everything
+1. Detects your hardware and sets `OLLAMA_CONTEXT_LENGTH`
+2. Installs Ollama and pulls RAM-tier models
+3. Configures VS Code + Continue.dev (JSON + YAML)
+4. Installs Aider (`aider-offline`, `aider-openrouter`)
+5. Optionally installs OpenCode
+6. Tests Ollama
 
-**Total:** 30-45 minutes, then zero setup forever.
+**Total:** tens of minutes (mostly downloads) for the local stack.
+
+Already installed? `bash scripts/apply-studio-configs.sh` from a clone.
 
 ---
 
@@ -58,7 +62,24 @@ Create a new component for displaying user profiles
 Refactor the state management to use Zustand
 ```
 
-Aider reads your whole project, makes changes, commits to git. It's like a junior developer in your terminal.
+### Using OpenCode (TUI)
+
+```bash
+cd ~/your-project
+opencode
+```
+
+`/models` → pick `ollama/<tag>` from `ollama list`. Permissions in the example config **ask** before edits and shell. Copy `examples/AGENTS.md` into the project. Full guide: [docs/OPENCODE.md](docs/OPENCODE.md).
+
+### OpenRouter free models (online — not offline)
+
+1. Create a key at https://openrouter.ai/keys
+2. VS Code: `~/.continue/.env` with `OPENROUTER_API_KEY=` (Continue does not read zsh `export`)
+3. CLI: `export OPENROUTER_API_KEY=…` then `aider-openrouter` or `opencode` → `/connect`
+4. Keep **tab autocomplete** on local Qwen so you do not burn the free daily cap
+5. Expect 429s. Catalog: https://openrouter.ai/models?q=free
+
+Full guide: [docs/OPENROUTER.md](docs/OPENROUTER.md). Guardrails: [docs/GUARDRAILS.md](docs/GUARDRAILS.md).
 
 ---
 
@@ -123,9 +144,11 @@ Each step, the AI understands the previous context. It's truly conversational.
 
 | Tool | When to Use | How |
 |------|------------|-----|
-| **VS Code Chat (Cmd+L)** | Most of the time. Visual, familiar. | Open VS Code → Cmd+L → chat |
-| **Aider Terminal** | When you want the AI to manage your whole project. | `aider-offline` in your project folder |
-| **Open WebUI** | Brainstorming, planning, asking questions. | `webui-start` → open http://localhost:8080 |
+| **VS Code Chat (Cmd+L)** | Local chat + complete; optional OpenRouter in the dropdown | Open VS Code → Cmd+L |
+| **Aider Terminal** | Whole-project edits, local | `aider-offline` |
+| **Aider + OpenRouter** | Online free models | `aider-openrouter` (needs key) |
+| **OpenCode** | TUI agent, local or OpenRouter | `opencode` then `/models` |
+| **Open WebUI** | Browser chat | `webui-start` → http://localhost:8080 |
 
 ---
 
@@ -231,7 +254,7 @@ That's it. You've got your own Claude/Copilot equivalent, forever, on your machi
 **Ready?** Run the installer:
 
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/yourusername/offline-ai-coding/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Nonarkara/offline-ai-coding/main/install.sh)
 ```
 
 Welcome. You're about to save a lot of money and gain a lot of freedom.

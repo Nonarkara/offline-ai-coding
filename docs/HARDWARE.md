@@ -8,13 +8,13 @@
 
 **Got 8GB RAM?** It works. Slower responses but functional. Worth trying.
 
-**Less than 8GB?** Unfortunately too limited for local LLMs.
+**This studio’s boxes:** an **M3 MacBook Air (16GB)** — use the 16GB installer row; it is tight — and an **M5 Max (128GB)** — use the 64GB+ row. Same method, two RAM classes. See [GUARDRAILS.md](GUARDRAILS.md).
 
 ---
 
 ## Detailed Compatibility
 
-### Apple Silicon Mac (M1, M2, M3, M4)
+### Apple Silicon Mac (M1–M5)
 
 **Why it's the best:** Apple's unified memory architecture means the GPU and CPU share RAM. LLMs can use all your memory, not just the GPU's VRAM. This is a massive advantage.
 
@@ -29,6 +29,11 @@
 | M3 | 16GB | Qwen 14B | ~20 tok/s | Very good |
 | M3 Pro/Max | 32-64GB | Qwen 32B | ~12 tok/s | Excellent |
 | M4 | 16-32GB | Qwen 32B | ~15 tok/s | Excellent |
+| M5 Max | 128GB | Installer 64GB+ row (`qwen2.5-coder:32b` + 7B complete + 14B reasoning) | Not timed in this repo | Desk machine this studio actually uses |
+
+**M3 Air 16GB in practice:** the installer pulls `qwen2.5-coder:14b` for chat. If macOS starts swapping hard, drop to the 8GB chat tag (`gemma4:e4b`) or lower `OLLAMA_CONTEXT_LENGTH` rather than adding more models. OpenRouter free models are the online overflow, not a local upgrade.
+
+**M5 Max 128GB in practice:** the 64GB+ row fits comfortably. Extra `ollama pull` tags are optional and not part of `install.sh`. Raise daemon context only after the menu-bar app has been quit and relaunched (`launchctl getenv OLLAMA_CONTEXT_LENGTH`).
 
 ### Intel Mac
 
