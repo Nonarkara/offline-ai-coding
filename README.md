@@ -1,378 +1,170 @@
+<p align="center">
+  <img src="docs/hero-banner.png" alt="Hand-drawn manga illustration of a mentor and a learner at one Mac in a rainy-night civic studio. Warm lamp, local box beside the laptop, city outside the window. No interface overlay." width="100%">
+</p>
+
+<p align="center"><em>Studio banner for this public repo — one Mac, local models, a civic studio at night. Illustration only; not a screenshot of the installer.</em></p>
+
 # Offline AI Coding
 
-**Stop paying for tokens. Stop waiting for internet. Code with AI — completely offline — on your own hardware.**
+**โค้ดด้วย AI บนเครื่องตัวเอง** · Code with AI on hardware you own.
 
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/nonarkara/offline-ai-coding/main/install.sh)
-```
+[![License: MIT](https://img.shields.io/badge/license-MIT-1A1A1A)](LICENSE)
 
-One command. 30 minutes. Then you have Claude Code / Cursor / Copilot — but free, private, and offline forever.
+By [Non Arkaraprasertkul (Nonarkara)](https://github.com/Nonarkara) — [Axiom X Co., Ltd.](https://axiom.nonarkara.org), Bangkok.
 
----
+**[Quick start](QUICKSTART.md)** · **[Hardware](docs/HARDWARE.md)** · **[Off the grid](OFF-THE-GRID-GUIDE.md)** · **[Troubleshooting](TROUBLESHOOTING.md)**
 
-## Why This Exists
-
-The old model is broken. Vendors lock their AI behind subscriptions, NDAs, and six-figure enterprise fees. They sell you a black box. You wait months for a demo, years for deployment. By the time it arrives, the technology is obsolete.
-
-This project does the opposite.
-
-We built it. Then we pushed the code to GitHub. Anyone can take it. Fork it. Break it. Make it better. We don't care if they compete with us. We care that they stop waiting for permission.
-
-**The rules are simple:**
-
-- **Share everything.** Source code, install scripts, configuration, prompts. No hidden modules. No "enterprise edition."
-- **Write clear instructions.** Tell people how to run it on their own laptop, their own cloud, their own city. Step by step. Like they're five.
-- **Don't hoard knowledge.** The value isn't in the code. The value is in knowing what problem to solve.
-- **Let people steal from you.** If someone takes this and builds a product, good for them. We'll build a better version tomorrow.
-
-GitHub is our weapon. Open source is our revolution.
-
-Take it. Use it. Break it. Tell us what you built.
+This repository is an installer and a method: one command that stands up a **local** AI coding stack on a machine you control. After the first download it does not need the internet. There is no hosted demo and no cloud account.
 
 ---
 
-## The Problem
+## What this is
 
-You're probably here because one (or more) of these describes you:
+A public setup for coding with open-weight models **on your own computer** — VS Code chat, tab autocomplete, and a terminal agent — without a monthly token bill and without sending your repo to a vendor.
 
-1. **Token costs are killing you.** Claude, Gemini, ChatGPT, Copilot — $20/month here, $10/month there. You code a lot. It adds up fast.
+`install.sh` detects OS, architecture, RAM, and free disk, then installs and wires:
 
-2. **You work offline.** Planes, trains, remote cabins, developing countries, rural areas, coffee shops with garbage WiFi. You need AI coding assistance but can't rely on internet.
+| Piece | Role |
+|-------|------|
+| **Ollama** | Local model runtime (auto-start on boot where the installer can set it) |
+| **Chat / complete / reason models** | Sized from your RAM (see [How to use](#how-to-use--learn)) |
+| **VS Code + Continue.dev** | Editor chat (`Cmd+L` / `Ctrl+L`) and tab complete, pointed at `localhost` |
+| **Aider** | Terminal agent via the `aider-offline` alias |
+| **Open WebUI** | Optional browser chat (`webui-start` → `http://localhost:8080`) |
+| **Kyutai Pocket TTS** | Optional offline voice (`speak`); skipped unless you say yes |
 
-3. **You care about privacy.** Your code shouldn't live on someone else's servers. You want everything local.
+It also repairs the shell `PATH` — the failure mode the troubleshooting notes treat as the usual “command not found” cause.
 
-4. **You want to own your tools.** APIs change pricing. Services shut down. Terms of service shift. You want something that's *yours*.
+**This repo is not** a hosted coding assistant, a model zoo with private weights, or a ranking of tools. It is the **method**: hardware detection, public model IDs, and the scripts that connect them. Fork that. Do not expect secrets, API keys, or a live URL.
 
-5. **You're tired of configuration hell.** You tried Ollama or local LLMs but spent hours fighting PATH variables, broken configs, and mysterious errors. You just want it to *work*.
-
-This project solves all five. One command, and you have a complete, production-ready offline AI coding stack.
-
----
-
-## What You Get
-
-### AI Models Running Locally
-
-| Model | Size | What It Does |
-|-------|------|-------------|
-| **Qwen 2.5 Coder 32B** | 19GB | Your main coding brain on 32GB+ machines. Benchmarks near GPT-4o. 200+ languages. |
-| **Gemma 4 E4B** | ~9.6GB | Main coding brain on **8GB** machines. MatFormer-nested — only ~4.5B params active per token despite the larger download, so it fits a tight RAM budget. Multimodal, up to 256K context. |
-| **Qwen 2.5 Coder 7B** | 4.7GB | Real-time autocomplete as you type. |
-| **DeepSeek R1 14B** | 9GB | Complex reasoning and debugging. |
-
-The installer auto-detects your RAM and chooses model sizes that fit. You don't have to decide anything.
-
-**Why Gemma 4 E4B on the 8GB tier instead of another Qwen model:** the "E4B" name is Google's MatFormer nesting — the ~8B-parameter download only activates ~4.5B params per token, so quality-per-GB beats a same-footprint dense model. It also needs **Ollama 0.22+**; the installer checks and upgrades automatically if you're behind.
-
-### VS Code + AI Chat (Like Cursor / Copilot)
-
-Open VS Code. Press **Cmd+L** (Mac) or **Ctrl+L** (Linux/Windows). Chat with your AI in plain English:
-
-- *"Create a React component for a dashboard"*
-- *"Add TypeScript types to all functions"*
-- *"Fix the error on line 23"*
-- *"Refactor this to use hooks"*
-
-Press **Tab** for autocomplete suggestions as you type. It looks and feels like Cursor or GitHub Copilot — but it runs entirely on your machine.
-
-### Aider Terminal Agent (Like Claude Code)
-
-For when you want an AI that reads your whole project and makes changes across multiple files:
-
-```bash
-cd ~/my-project
-aider-offline
-```
-
-Then just chat:
-
-```
-> Add dark mode support to the entire app
-> Create a REST API with authentication
-> Refactor the database layer to use Prisma
-> Fix all TypeScript errors
-```
-
-Aider reads your codebase, edits files, and auto-commits to git. It's like having a developer working alongside you in the terminal.
-
-### Open WebUI (Like ChatGPT — Optional)
-
-A browser-based chat interface for brainstorming, planning, and asking questions:
-
-```bash
-webui-start
-# Then open http://localhost:8080
-```
-
-### Voice — Kyutai Pocket TTS (Optional)
-
-Offline text-to-speech, for having your AI read code reviews, changelogs, or long
-responses out loud instead of scrolling:
-
-```bash
-speak --text "the build passed" --voice default
-```
-
-**Why Kyutai over VoiceBox:** VoiceBox was published as a Meta research paper and
-demo — never released as weights you can actually download and run. Kyutai's
-[Pocket TTS](https://github.com/kyutai-labs/pocket-tts) is a real open-weight
-model: 100M parameters, real-time on CPU, no GPU required, with voice cloning
-from a short wav sample. That's the bar for anything in this repo — if you
-can't `pip install` it and run it fully offline, it doesn't belong here.
-
-Skipped by default (prompted during install, default: no) since it's not core
-to coding. Install later anytime: `pip3 install pocket-tts`.
+Internet is required **once**, to fetch Homebrew/Ollama, models, and extensions. After that the models live under `~/.ollama`. Related notes: [QUICKSTART.md](QUICKSTART.md), [OFF-THE-GRID-GUIDE.md](OFF-THE-GRID-GUIDE.md), [docs/HARDWARE.md](docs/HARDWARE.md).
 
 ---
 
-## Hardware Requirements
+## Philosophy
 
-| RAM | Experience | Models You Get |
-|-----|-----------|---------------|
-| **8GB** | Works (slower) | Gemma 4 E4B + DeepSeek 1.5B |
-| **16GB** | Good | Qwen 14B + DeepSeek 7B |
-| **32GB** | Excellent | Qwen 32B + DeepSeek 14B |
-| **64GB+** | Best possible | Everything, full speed |
+Written for learners who land from the [Nonarkara](https://github.com/Nonarkara) profile — **Thai and English** readers equally. The studio is one desk in Bangkok, not a platform company.
 
-**Minimum:** 8GB RAM, any modern CPU, 40GB free disk space.
+1. **Fork the method, not the secrets.** The value is the installer, the RAM tiers, and the local wiring. There is nothing to hoard: no tokens in this tree, no private endpoint, no “enterprise edition.” If you take the scripts and ship a better stack, that is the point.
+2. **One Mac.** The intended home is a single machine you own — Apple Silicon is where the notes are strongest (unified memory). The same scripts also try Linux and mention Windows via WSL2; those paths are still being proven. You do not need a cluster.
+3. **No black-box rankings.** The installer does not sell a league table of models. It picks sizes from RAM and writes the IDs into Continue and Aider. The mapping is in `install.sh`. If a smaller box gets Gemma 4 E4B instead of Qwen 7B, the reason is in that file (MatFormer nesting, Ollama 0.22+), not a hidden score.
+4. **Own the tools; rent nothing after setup.** Models on disk cannot be repriced or withdrawn the way an API can. Continue is configured with `allowAnonymousTelemetry: false`.
+5. **Clear instructions beat a demo.** Step-by-step, as if the reader is new. Knowledge is not the paywall.
 
-**Best:** Apple Silicon Mac (M1/M2/M3/M4) with 32GB+ RAM. The unified memory architecture makes local LLMs fly.
-
-The installer detects your hardware and tells you exactly what's possible.
-
-See [HARDWARE.md](docs/HARDWARE.md) for detailed compatibility.
+Company of record: **Axiom X Co., Ltd.** Author: **Non Arkaraprasertkul (Nonarkara)**. This public repo is studio method, not a billed Axiom product.
 
 ---
 
-## Installation
+## Ethical use
 
-### The One-Liner
+Treat this as a **local workshop**, not a substitute for judgment, and not a license to dump other people’s work into a model you do not control.
+
+**Do**
+
+- Keep the stack on **localhost**. After setup, chat and complete should hit Ollama on your machine (`http://localhost:11434` in the Continue config the installer writes).
+- Read each model’s own licence (Qwen, Gemma, DeepSeek, and anything you `ollama pull` later) before commercial use. This repo’s MIT grant covers **these scripts and docs**, not upstream weights.
+- Review generated code. A local model is still a model.
+- Leave credentials out of git. `.gitignore` already ignores `.continue/` and `.ollama/`.
+- Say so if you publish a fork. Do not present a restyled installer as the official Nonarkara stack.
+
+**Do not**
+
+- Treat “offline forever” as “never download again” during the **first** install — the one-liner needs the network.
+- Invent a live product URL, a leaderboard, or a quality score this repo does not measure.
+- Commit API keys, tokens, or someone else’s Continue/Ollama user config.
+- Imply this is Claude, Copilot, or Cursor, or that it is an official depa / municipal / UN tool. It is independent studio work.
+- Point the same machine at a cloud provider and call the result “offline.”
+
+If a contribution only works by pasting a secret, it does not belong here.
+
+---
+
+## How to use / learn
+
+**Best path today:** macOS (Apple Silicon fully exercised in the notes; Intel tested with Rosetta). Ubuntu 22.04+ and Windows 11 WSL2 are listed as in progress — try them, file what breaks.
+
+**Minimum:** 8 GB RAM, a current CPU, tens of GB free (the installer warns under 40 GB). **Comfortable:** 32 GB+ Apple Silicon. Exact tier tables: [docs/HARDWARE.md](docs/HARDWARE.md).
+
+### Install
+
+One-liner (needs network this once):
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/nonarkara/offline-ai-coding/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Nonarkara/offline-ai-coding/main/install.sh)
 ```
 
-### What It Does (Automatically)
-
-1. **Detects your hardware** — OS, CPU, RAM, architecture, free disk space
-2. **Fixes your shell PATH** — the #1 cause of "command not found" errors
-3. **Installs Homebrew** — package manager (if needed)
-4. **Installs Ollama** — local AI model runtime
-5. **Downloads AI models** — auto-selects sizes based on your RAM
-6. **Installs VS Code** — if not already present
-7. **Configures Continue.dev** — VS Code extension for AI chat
-8. **Installs Aider** — terminal coding agent
-9. **Sets up auto-start** — Ollama launches on boot
-10. **Tests everything** — verifies models work end-to-end
-
-**Time:** 30-45 minutes (mostly downloading models). You only do this once.
-
-**Internet:** Required for this initial setup. After that, never again.
-
-### Alternative: Clone and Run
+Or clone and run:
 
 ```bash
-git clone https://github.com/nonarkara/offline-ai-coding.git
+git clone https://github.com/Nonarkara/offline-ai-coding.git
 cd offline-ai-coding
 chmod +x install.sh
 ./install.sh
 ```
 
+Then open a **new** terminal so `PATH` and aliases load.
+
+What the script does, in order: detect hardware → fix `PATH` → Homebrew → Ollama (upgrade if Gemma 4 needs 0.22+) → pull models → VS Code if missing → Continue.dev + `~/.continue/config.json` → Aider + `aider-offline` → optional Open WebUI → optional Pocket TTS → a short verify.
+
+Downloads dominate the wait (the docs say on the order of half an hour). Re-run if a pull drops; already-present models are skipped.
+
+### RAM → models (`install.sh`)
+
+| RAM | Chat | Autocomplete | Reasoning |
+|-----|------|--------------|-----------|
+| 64 GB+ | `qwen2.5-coder:32b` | `qwen2.5-coder:7b` | `deepseek-r1:14b` |
+| 32 GB | `qwen2.5-coder:32b` | `qwen2.5-coder:7b` | `deepseek-r1:7b` |
+| 16 GB | `qwen2.5-coder:14b` | `qwen2.5-coder:7b` | `deepseek-r1:7b` |
+| 8 GB | `gemma4:e4b` | `qwen2.5-coder:3b` | `deepseek-r1:1.5b` |
+| under 8 GB | installer exits | | |
+
+8 GB uses Gemma 4 E4B because the script treats it as a better fit than another dense 7B on that budget. You can add models later with `ollama pull`.
+
+### Daily loop
+
+1. Ollama should already be up (menu bar app, `brew services`, or `ollama serve`).
+2. Open a project in VS Code → **Cmd+L** / **Ctrl+L** → ask in plain language. Tab accepts complete.
+3. Or: `cd` into a git repo and run `aider-offline`.
+4. Optional: `webui-start` then `http://localhost:8080`. Optional: `speak --text "…" --voice default`.
+5. Work offline. Push when you are back on a network.
+
+Worked examples: [QUICKSTART.md](QUICKSTART.md). When something fails: [TROUBLESHOOTING.md](TROUBLESHOOTING.md), then `bash scripts/verify.sh`. Extra Mac-oriented narrative: [OFF-THE-GRID-GUIDE.md](OFF-THE-GRID-GUIDE.md). Other scripts in the tree (`setup-offline-coding.sh`, `install-main.sh`, `start-coding.sh`, `fix-continue-config.sh`) are older or helper copies — **`install.sh` is the current installer.**
+
 ---
 
-## Usage
+## System diagram
 
-### Daily Workflow
-
-1. **Open VS Code** (Ollama auto-starts on boot — no setup needed)
-2. **Open your project folder** (File → Open Folder)
-3. **Press Cmd+L** to chat with AI
-4. **Code in plain English**
-
-That's it. No terminal. No configuration. No internet.
-
-### New Project
-
-```bash
-mkdir ~/Projects/my-app && cd ~/Projects/my-app && git init
-code .
-# Press Cmd+L → "Create a Next.js app with TypeScript and Tailwind"
+```mermaid
+flowchart LR
+    You[You] --> VS[VS Code]
+    You --> Aid[Aider]
+    You --> Web[WebUI]
+    VS --> Ol[Ollama]
+    Aid --> Ol
+    Web --> Ol
+    Ol --> Disk[Local models]
 ```
 
-### Existing GitHub Project
-
-```bash
-# Clone while online
-git clone https://github.com/your/repo.git
-cd repo
-
-# Code offline anytime
-code .
-# Press Cmd+L → "Add authentication to the API endpoints"
+```mermaid
+flowchart LR
+    Sh[install.sh] --> Ram[RAM detect]
+    Ram --> Pull[ollama pull]
+    Pull --> Cfg[Continue + aliases]
+    Cfg --> You[Your machine]
 ```
 
-### Terminal Agent
-
-```bash
-cd ~/Projects/my-app
-aider-offline
-# > "Refactor the entire state management layer"
-```
-
-### Push When Back Online
-
-```bash
-git add -A && git commit -m "Added features offline" && git push
-```
-
-See [QUICKSTART.md](QUICKSTART.md) for detailed workflows.
+Everything after install is on-box. No studio backend.
 
 ---
 
-## What Makes This Different
+## License / contributing
 
-### vs. "Just Install Ollama"
+[MIT](LICENSE). Copyright © 2026 **Non Arkaraprasertkul / Axiom X Co., Ltd.**
 
-Ollama alone doesn't give you IDE integration, auto-configuration, PATH fixes, or a terminal agent. This project automates everything that usually takes hours of debugging.
+MIT covers this repository’s scripts and documentation. Ollama, VS Code, Continue.dev, Aider, Open WebUI, Pocket TTS, and each model keep their own licences.
 
-### vs. Claude / ChatGPT / Copilot ($20+/month)
+Help that is actually useful: Linux and WSL2 test reports, GPU notes (CUDA / ROCm), translations, and clearer docs. See [CONTRIBUTING.md](CONTRIBUTING.md). Bug reports: what you ran, the exact error, RAM / CPU / OS, `ollama list`, and `echo $PATH`.
 
-- ✅ Zero monthly cost
-- ✅ Works offline
-- ✅ Your code stays on your machine
-- ✅ No vendor lock-in
-- ✅ No rate limits
+The hero at `docs/hero-banner.png` is studio illustration for this README, not a data product.
 
-### vs. Cursor ($20/month)
-
-- ✅ Free forever
-- ✅ Works offline
-- ✅ Open source
-- ✅ You control the models
-- ✅ No telemetry
-
-### vs. Self-Hosting LLMs
-
-- ✅ Pre-configured — no YAML files to edit
-- ✅ Hardware auto-detection
-- ✅ IDE integration included
-- ✅ Troubleshooting guide included
-- ✅ Works on first try
-
----
-
-## Supported Platforms
-
-| Platform | Status |
-|----------|--------|
-| macOS (Apple Silicon M1-M4) | ✅ Fully tested |
-| macOS (Intel) | ✅ Tested (requires Rosetta) |
-| Ubuntu 22.04+ | 🟡 In progress |
-| Windows 11 (WSL2) | 🟡 In progress |
-| Other Linux distros | 🟡 Community contributions welcome |
-
----
-
-## FAQ
-
-**Is this legal?**
-Yes. All software (Ollama, Qwen, DeepSeek, Continue.dev, Aider) is open source under permissive licenses. This project is MIT-licensed.
-
-**Is it really as good as Claude/GPT-4?**
-Qwen 2.5 Coder 32B benchmarks at 73.7 on the Aider coding benchmark — within striking distance of GPT-4o. For most coding tasks, you won't notice the difference.
-
-**How much does it cost?**
-Zero. Open-source software on hardware you already own. If you need to upgrade RAM, that's a one-time cost.
-
-**Can I use this commercially?**
-Yes. Check individual model licenses (Qwen and DeepSeek both allow commercial use).
-
-**What if my computer is too old?**
-Even 8GB RAM machines can run 7B models. It's slower but functional. See [docs/HARDWARE.md](docs/HARDWARE.md).
-
-**Can I add more models later?**
-Absolutely:
-```bash
-ollama pull codestral:22b    # Mistral's coding model
-ollama pull llama3:70b       # Meta's general model
-```
-
----
-
-## Project Structure
-
-```
-offline-ai-coding/
-├── README.md                  ← You're here
-├── QUICKSTART.md              ← 5-minute setup guide
-├── TROUBLESHOOTING.md         ← Every problem + solution
-├── install.sh                 ← The main installer
-├── scripts/
-│   ├── fix-path.sh           ← PATH repair utility
-│   └── verify.sh             ← Installation tester
-├── docs/
-│   ├── HARDWARE.md           ← Hardware requirements
-│   ├── MODELS.md             ← Model details and benchmarks
-│   ├── CONFIGURATION.md      ← Customization guide
-│   └── FAQ.md                ← Extended FAQ
-├── .github/
-│   └── ISSUE_TEMPLATE/       ← Bug report templates
-├── CONTRIBUTING.md            ← How to help
-└── LICENSE                    ← MIT
-```
-
----
-
-## Contributing
-
-We want this to work on every platform, for every developer.
-
-**Areas we need help:**
-- Linux testing (Ubuntu, Fedora, Arch)
-- Windows WSL2 support
-- GPU acceleration (NVIDIA CUDA, AMD ROCm)
-- Documentation and video walkthroughs
-- Model benchmarking
-- Internationalization
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
----
-
-## The Philosophy
-
-> *"Every line of code I write is a middle finger to the old guard. To the $935 paywalls. To the 'platinum certifications.' To the consultants who gatekeep knowledge."*
-
-This project exists because we believe:
-
-1. **AI coding tools should be free.** The models are open source. The tools are open source. The setup should be too.
-
-2. **Knowledge should be shared.** No hidden modules. No enterprise edition. Everything is public.
-
-3. **Developers deserve independence.** You shouldn't need a subscription to write code. You shouldn't need internet to think.
-
-4. **The best tools are owned, not rented.** When you run this, the models live on your machine. They can't be taken away, repriced, or shut down.
-
-If this saves you money, time, or frustration — share it with someone else.
-
-If you build something with it — tell us. We want to know.
-
----
-
-## License
-
-MIT. Use, modify, distribute freely. See [LICENSE](LICENSE).
-
----
-
-## Star This Repo
-
-If this helped you, star it. It helps others find it.
-
-If you have ideas, open an issue. If you have code, open a PR.
-
-**Let's make offline AI coding accessible to everyone.**
-
----
-
-*Built by [nonarkara](https://github.com/nonarkara) — city systems designer, anthropologist, and advocate for open knowledge. April 2026.*
+If this setup lets you work without a token meter, teach the next person. If you build on the method, say so — the studio wants to see it.
