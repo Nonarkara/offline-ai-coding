@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: Offline AI Coding
+message: If you use this installer or method, please cite it.
+type: software
+authors:
+  - family-names: Arkaraprasertkul
+    given-names: Non
+    affiliation: Axiom X Co., Ltd.
+license: MIT
+license-url: https://github.com/Nonarkara/offline-ai-coding/blob/main/LICENSE
+repository-code: https://github.com/Nonarkara/offline-ai-coding
+url: https://github.com/Nonarkara/offline-ai-coding
+abstract: >-
+  Public installer and method for a local AI coding stack
+  (Ollama, VS Code + Continue, Aider) on a machine you own.
+  Internet once to download; localhost after.
+keywords:
+  - offline
+  - ollama
+  - local-llm
+  - vscode
+  - continue
+  - aider

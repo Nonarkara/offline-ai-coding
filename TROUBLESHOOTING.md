@@ -1,6 +1,10 @@
-# Troubleshooting — We've Hit All These Problems. Solutions Included.
+# Troubleshooting
 
-This guide covers the issues we've encountered in hundreds of installations. **Read this if anything isn't working.**
+Canonical install: `install.sh` from [README.md](README.md). Verify first: `bash scripts/verify.sh`. Privacy: [SECURITY.md](SECURITY.md). Do not paste API keys to “fix” a local stack.
+
+Jumps: [PATH](#command-not-found-for-basic-commands) · [ollama missing](#command-not-found-ollama) · [Continue empty](#vscode-no-model-configured-in-continuedev-chat) · [model not found](#model-not-found-when-asking-ai-a-question) · [download stuck](#model-download-stuck--very-slow) · [8 GB / slow](#my-computer-is-too-oldslow)
+
+This guide covers the issues we have actually hit. **Read this if anything isn't working.**
 
 ---
 
@@ -87,9 +91,9 @@ This shows your models. If they're there, everything is working.
    Should show models. If not, run `ollama serve` in another Terminal tab.
 4. **Press Cmd+L** in VS Code
 
-If it still doesn't work, the config file didn't write properly.
+If it still doesn't work, the config file didn't write properly. Re-run `./install.sh` if you can — it rewrites Continue from your RAM tier (8 GB uses `gemma4:e4b`, not the 32B example below).
 
-**Rebuild the config:**
+**Rebuild the config** (32 GB+ example — change the IDs to match `ollama list`):
 ```bash
 mkdir -p ~/.continue
 cat > ~/.continue/config.json << 'EOF'
@@ -150,7 +154,7 @@ qwen2.5-coder:7b      dae161e27b0e    4.7 GB  1 hour ago
 
 If the list is empty, the download didn't complete. Re-run the installer:
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/yourusername/offline-ai-coding/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Nonarkara/offline-ai-coding/main/install.sh)
 ```
 
 It will resume downloading models.
@@ -184,7 +188,7 @@ Instead of normal English text.
 2. **Open a new Terminal**
 3. **Run the installer again:**
    ```bash
-   bash <(curl -s https://raw.githubusercontent.com/yourusername/offline-ai-coding/main/install.sh)
+   bash <(curl -fsSL https://raw.githubusercontent.com/Nonarkara/offline-ai-coding/main/install.sh)
    ```
 
 The script is idempotent — it checks what's already installed and skips it. It's safe to re-run.
@@ -214,7 +218,7 @@ The script will resume from where it left off. Model downloads are resumable. Ju
    Partially downloaded models show up here.
 3. **Re-run the installer:**
    ```bash
-   bash <(curl -s https://raw.githubusercontent.com/yourusername/offline-ai-coding/main/install.sh)
+   bash <(curl -fsSL https://raw.githubusercontent.com/Nonarkara/offline-ai-coding/main/install.sh)
    ```
    It will resume the download.
 
@@ -309,7 +313,7 @@ If you see other apps using lots of memory, close them while coding.
 
 **Solution:** Clone it when you have internet:
 ```bash
-git clone https://github.com/yourusername/my-repo.git ~/my-repo
+git clone https://github.com/YOUR_ACCOUNT/YOUR_REPO.git ~/my-repo
 ```
 
 Then later, offline:
@@ -396,13 +400,12 @@ sysctl -n hw.ncpu
 
 **Reality:** Even on 8GB with a 10-year-old CPU, it works. It's just slower. You might wait 30-40 seconds for a response instead of 10.
 
-**If you're at the minimum:** Use the 7B models instead of 32B. They're faster and still surprisingly good.
+**If you're at the minimum:** Re-run `install.sh` so it can pick the 8 GB tier (`gemma4:e4b` + `qwen2.5-coder:3b`). Do not force a 32B chat model onto 8 GB — it will swap.
 
 ```bash
-# in ~/.continue/config.json, change:
-# "model": "qwen2.5-coder:32b"
-# to:
-# "model": "qwen2.5-coder:7b"
+# Confirm what the installer wrote:
+grep '"model"' ~/.continue/config.json
+ollama list
 ```
 
 ---
@@ -410,7 +413,7 @@ sysctl -n hw.ncpu
 ## Something Else Broke
 
 **Not listed here?** Open an issue on GitHub:
-https://github.com/yourusername/offline-ai-coding/issues
+https://github.com/Nonarkara/offline-ai-coding/issues
 
 Include:
 1. What you were trying to do

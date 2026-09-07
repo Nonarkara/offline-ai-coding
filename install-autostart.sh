@@ -1,5 +1,6 @@
 #!/bin/bash
 # ============================================================================
+# SPDX-License-Identifier: MIT
 # INSTALL AUTO-START
 # Run this ONCE to make Ollama auto-start when your Mac boots
 # and create a desktop app launcher for your coding environment

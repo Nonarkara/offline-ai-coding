@@ -1,5 +1,6 @@
 #!/bin/bash
 # ============================================================================
+# SPDX-License-Identifier: MIT
 # OFF-THE-GRID: ONE-CLICK LAUNCHER
 # Opens your full offline AI coding environment
 # Double-click this file or run: bash start-coding.sh

@@ -37,5 +37,7 @@ ollama list
 code --version
 ```
 
-## Did you check TROUBLESHOOTING.md?
+## Did you check TROUBLESHOOTING.md and SECURITY.md?
 - [ ] Yes, my issue isn't listed there
+- [ ] I ran `bash scripts/verify.sh` (paste the result, no secrets)
+- [ ] This report does **not** contain API keys, `.env`, or a cloud provider token

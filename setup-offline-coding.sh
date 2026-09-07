@@ -1,5 +1,6 @@
 #!/bin/bash
 # ============================================================================
+# SPDX-License-Identifier: MIT
 # OFF-THE-GRID CODING SETUP
 # Complete offline AI coding environment for Apple Silicon Mac
 # ============================================================================

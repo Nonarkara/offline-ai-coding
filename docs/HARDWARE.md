@@ -1,14 +1,16 @@
 # Hardware Compatibility Guide
 
-## Quick Answer
+Landing page and RAM → model table: [README.md](../README.md#hardware-tiers). First session: [QUICKSTART.md](../QUICKSTART.md). Speeds below are **studio observations**, not a benchmark league table. Model licences are not MIT — see [SECURITY.md](../SECURITY.md).
 
-**Got 32GB+ RAM and an Apple Silicon Mac?** You'll have the best experience. Near GPT-4o quality.
+## Quick answer
 
-**Got 16GB RAM?** Great experience. Slightly smaller models but still very good.
+**Got 32GB+ RAM and an Apple Silicon Mac?** Best path this studio actually uses. Unified memory helps.
 
-**Got 8GB RAM?** It works. Slower responses but functional. Worth trying.
+**Got 16GB RAM?** Smaller chat model (`qwen2.5-coder:14b`). Still the intended “one Mac” setup.
 
-**Less than 8GB?** Unfortunately too limited for local LLMs.
+**Got 8GB RAM?** The installer picks Gemma 4 E4B + a 3B completer, not a dense 7B. Slower. Worth trying.
+
+**Less than 8GB?** The installer exits. Too limited for this method.
 
 ---
 
@@ -131,4 +133,4 @@ If you're considering a hardware upgrade specifically for offline AI coding:
 
 **Linux alternative:** Any desktop with 32GB RAM and an RTX 3060+ (~$800-1200 custom build).
 
-Compare to: $20/month × 12 months = $240/year for a single AI subscription. The hardware pays for itself.
+Compare to a yearly API subscription only as a budget sketch — local quality is not a score we publish. Upgrade because you want the weights on a machine you own.

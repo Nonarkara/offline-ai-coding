@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
+# SPDX-License-Identifier: MIT
 # OFFLINE AI CODING — Complete Setup Script
 #
 # This script sets up a full offline AI coding environment:

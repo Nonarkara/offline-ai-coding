@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # ============================================================================
 # OFFLINE AI — LIVE SELF-TEST
 # Actually runs each model and confirms it responds correctly.

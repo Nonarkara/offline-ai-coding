@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Non Arkaraprasertkul / Axiom X Co., Ltd.
 # ============================================================================
 # INSTALLATION VERIFIER
 # Checks that everything is installed and working
@@ -35,12 +37,14 @@ check "Python3 installed" "command -v python3"
 
 echo ""
 echo "AI Models:"
-check "Qwen Coder model" "ollama list | grep -q qwen2.5-coder"
-check "DeepSeek model" "ollama list | grep -q deepseek"
+check "Chat model (Qwen Coder or Gemma 4)" "ollama list | grep -qE 'qwen2.5-coder|gemma4'"
+check "Reasoning model (DeepSeek)" "ollama list | grep -q deepseek"
 
 echo ""
 echo "Configuration:"
 check "Continue.dev config" "test -f ~/.continue/config.json"
+check "Continue points at localhost" "grep -q 'localhost:11434' ~/.continue/config.json"
+check "Continue telemetry off" "grep -q 'allowAnonymousTelemetry.: false' ~/.continue/config.json"
 check "Aider installed" "command -v aider"
 check "aider-offline alias" "grep -q aider-offline ~/.zshrc 2>/dev/null || grep -q aider-offline ~/.zprofile 2>/dev/null || grep -q aider-offline ~/.bashrc 2>/dev/null"
 
@@ -56,13 +60,15 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 if [ $FAIL -eq 0 ]; then
     echo ""
-    echo "  🎉 Everything is working! You're ready to code offline."
-    echo ""
-    echo "  Next steps:"
-    echo "  • Open VS Code → Cmd+L → chat with AI"
+    echo "  Everything required is in place. Next:"
+    echo "  • VS Code → Cmd+L / Ctrl+L → 'Reply with: I am working locally.'"
+    echo "  • Tab-complete in a file"
     echo "  • Or: cd ~/your-project && aider-offline"
+    echo "  • Privacy: grep apiBase ~/.continue/config.json  (must be localhost)"
+    echo ""
+    echo "  See QUICKSTART.md → What success looks like."
 else
     echo ""
-    echo "  Some checks failed. See TROUBLESHOOTING.md for fixes."
+    echo "  Some checks failed. See TROUBLESHOOTING.md — do not add a cloud API key."
     echo "  Or re-run the installer: ./install.sh"
 fi
