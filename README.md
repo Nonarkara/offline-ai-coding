@@ -22,6 +22,12 @@ Welcome — this public installer stands up open-weight coding models on a machi
 
 This repository is an installer and a method. After the first download it does not need the internet. Fork the method. Do not expect secrets, API keys, or a live URL.
 
+> **Before the rules — [`BUILDER.md`](BUILDER.md): how this repository expects you to work.**
+> Build something rough enough to tear apart. Imagine a human doing the job before you
+> prompt an agent to do it. Give the agent the real source material, not a description of
+> it. Test, because a hypothesis proves nothing. Have a second, different agent look for
+> the flaw. The law in this repository is the floor, not the work.
+
 ---
 
 ## What this is
